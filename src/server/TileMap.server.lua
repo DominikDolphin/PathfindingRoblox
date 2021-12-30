@@ -1,8 +1,10 @@
 local array2D = require(script.Parent.Array2D)
 
 local ss = game:GetService("ServerStorage")
-local Unit = ss:WaitForChild("Unit");
+local Unit = ss:WaitForChild("Unit"):Clone();
+Unit.Parent = game.Workspace;
 
+local allMouseDetectors = {}
 
 mapSizeX = 10;
 mapSizeY = 10;
@@ -10,6 +12,12 @@ mapSizeY = 10;
 tileTypes = {"tileGrass", "tileMountain", "tileSwamp"}
 
 tiles = array2D.new(mapSizeX,mapSizeY,1)
+
+function addClickDetector(parent)
+	local cd = Instance.new("ClickDetector")
+	cd.Parent = parent;
+	table.insert(allMouseDetectors, cd);
+end
 
 function generateMapVisuals()
 	for x = 1,mapSizeX do
@@ -25,11 +33,28 @@ function generateMapVisuals()
 				local clone = instance:Clone()
 				clone.Parent = game.Workspace
 				clone.CFrame = CFrame.new(x,y,0);
+				addClickDetector(clone);
+				clone:SetAttribute("x",x);
+				clone:SetAttribute("y",y);
 			end
 			
 		end
 	end
+	for _,v in pairs(allMouseDetectors) do
+		print(v.Name)
+		v.MouseClick:connect(function()
+			print("clicked")
+			local x = v.Parent:GetAttribute("x")
+			local y = v.Parent:GetAttribute("y")
+			moveSelectedUnitTo(x,y)
+		end)
+	end
 end
+
+function moveSelectedUnitTo(x,y)
+	Unit.CFrame = CFrame.new(x,y,1)
+end
+
 
 function generateMapData()
 	
